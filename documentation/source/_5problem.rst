@@ -50,7 +50,7 @@ Lors du build, on obtient l'emprunte mémoire qui sera utilisé pour notre progr
 
 .. figure:: /_static/images/emlearn1.png
 
-.. figure:: /_static/images/emlearn1.png
+.. figure:: /_static/images/emlearn2.png
 
 On peut voir ici que 200 prédictions prennent 4s. 
 On peut aussi voir qu'on est aux environs de 3 mA pour la consommation, soit 2.4 - 3.7 mA.
