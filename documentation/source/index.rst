@@ -37,7 +37,9 @@ Pré-requis:
 - Jupyter notebook
 - Conda
 
-Vous trouverez dans un fichier ``requirement1.txt`` les bibliothèques Python utilisé leurs versions.
+.. note:: 
+   
+   Vous trouverez dans un fichier ``requirement1.txt`` les bibliothèques Python utilisé leurs versions.
 
 Tables des matières :
 ----------------------

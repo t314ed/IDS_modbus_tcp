@@ -34,98 +34,97 @@ Nous avons entrainé les modèles suivantes avec leurs paramètres respectifs :
 Modèles supervisés 
 ------------------
 
-    1. Pytorch
+1. Pytorch
 
-    Turotiel suivi : https://pytorch.org/tutorials/beginner/blitz/neural_networks_tutorial.html
+Turotiel suivi : https://pytorch.org/tutorials/beginner/blitz/neural_networks_tutorial.html
 
-        -  MLP (Multi Layer Perceptron)
-        On utilisera les paramètres suivants pour ce modèle : 
+    -  MLP (Multi Layer Perceptron)
+    On utilisera les paramètres suivants pour ce modèle : 
 
             - 3 couches 
             - 64 neurones par couche
             - 10 epochs
 
-        .. code-block:: python
+    .. code-block:: python
 
-            class MLP(nn.Module): 
-                def __init__(self, input_size):
-                    super(MLP, self).__init__()
-                    self.l1 = nn.Linear(input_size, 64) #couche 1 , input_size = nb features
-                    self.l2 = nn.Linear(64,64)          #couche 2
-                    self.l3 = nn.Linear(64,1)           #couche 3
-                    self.sigmoid = nn.Sigmoid()
+        class MLP(nn.Module): 
+            def __init__(self, input_size):
+                super(MLP, self).__init__()
+                self.l1 = nn.Linear(input_size, 64) #couche 1 , input_size = nb features
+                self.l2 = nn.Linear(64,64)          #couche 2
+                self.l3 = nn.Linear(64,1)           #couche 3
+                self.sigmoid = nn.Sigmoid()
 
-                def forward(self, x):
-                    x = torch.relu(self.l1(x))  # Activation ReLU après la 1ère couche
-                    x = torch.relu(self.l2(x))  # Activation ReLU après la 2ème couche
-                    x = self.sigmoid(self.l3(x))  # Activation Sigmoid pour la sortie
-                    return x
+            def forward(self, x):
+                x = torch.relu(self.l1(x))  # Activation ReLU après la 1ère couche
+                x = torch.relu(self.l2(x))  # Activation ReLU après la 2ème couche
+                x = self.sigmoid(self.l3(x))  # Activation Sigmoid pour la sortie
+                return x
 
-        Nous devons réaliser des manipulations sur les données pour les transformer en tenseurs PyTorch.
+    Nous devons réaliser des manipulations sur les données pour les transformer en tenseurs PyTorch.
 
-        .. code-block:: python 
+    .. code-block:: python 
 
-            # manipulation data
-            batch_size = 1000
-            
-            # Standardisation des données
-            scaler = StandardScaler()
-            x_train_scal = scaler.fit_transform(x_train)
-            x_test_scal  = scaler.fit_transform(x_test)
-            
-            # Convertir les données en tensor pytorch
-            x_train_tensor = torch.tensor(x_train_scal, dtype = torch.float32)
-            y_train_tensor  = torch.tensor(y_train, dtype = torch.float32)
-            x_test_tensor  = torch.tensor(x_test_scal, dtype = torch.float32)
-            y_test_tensor  = torch.tensor(y_test, dtype = torch.float32)
-            
-            # Créer les Dataloader pour les entrainnement et test
-            train_data = TensorDataset(x_train_tensor, y_train_tensor)
-            train_loader = DataLoader(train_data, batch_size = batch_size, shuffle=True)
-            
-            test_data = TensorDataset(x_test_tensor, y_test_tensor)
-            test_loader = DataLoader(test_data, batch_size = batch_size, shuffle=True)            
+        # manipulation data
+        batch_size = 1000
+        
+        # Standardisation des données
+        scaler = StandardScaler()
+        x_train_scal = scaler.fit_transform(x_train)
+        x_test_scal  = scaler.fit_transform(x_test)
+        
+        # Convertir les données en tensor pytorch
+        x_train_tensor = torch.tensor(x_train_scal, dtype = torch.float32)
+        y_train_tensor  = torch.tensor(y_train, dtype = torch.float32)
+        x_test_tensor  = torch.tensor(x_test_scal, dtype = torch.float32)
+        y_test_tensor  = torch.tensor(y_test, dtype = torch.float32)
+        
+        # Créer les Dataloader pour les entrainnement et test
+        train_data = TensorDataset(x_train_tensor, y_train_tensor)
+        train_loader = DataLoader(train_data, batch_size = batch_size, shuffle=True)
+        
+        test_data = TensorDataset(x_test_tensor, y_test_tensor)
+        test_loader = DataLoader(test_data, batch_size = batch_size, shuffle=True)
+                    
+    On peut instanscier le modèle comme suit :
 
-        On peut instanscier le modèle comme suit :
+    .. code-block:: python
 
-        .. code-block:: python
+        nb_features = 46 # nombre de features
+        mlp = MLP(nb_features) # Instancier le modèle
 
-            nb_features = 46 # nombre de features
-            mlp = MLP(nb_features) # Instancier le modèle
+    L'entrainnement se fera de cette façon :
 
-        L'entrainnement se fera de cette façon :
+    .. code-block:: python
 
-        .. code-block:: python
+        num_epochs = 10 # nombre d'epochs
+        # Définir la fonction de perte et l'optimiseur
+        criterion = nn.BCELoss()  # Perte binaire pour classification binaire
+        optimizer = optim.Adam(mlp.parameters(), lr=0.001)
 
-            num_epochs = 10 # nombre d'epochs
+        for epoch in range(num_epochs):
+            mlp.train()
+            running_loss = 0.0
 
-            # Définir la fonction de perte et l'optimiseur
-            criterion = nn.BCELoss()  # Perte binaire pour classification binaire
-            optimizer = optim.Adam(mlp.parameters(), lr=0.001)
+            for inputs, labels in train_loader:
+                # Zero gradients
+                optimizer.zero_grad()
 
-            for epoch in range(num_epochs):
-                mlp.train()
-                running_loss = 0.0
+                # Passage avant
+                outputs = mlp(inputs)
 
-                for inputs, labels in train_loader:
-                    # Zero gradients
-                    optimizer.zero_grad()
+                # Calcul de la perte
+                loss = criterion(outputs.squeeze(), labels.float())
 
-                    # Passage avant
-                    outputs = mlp(inputs)
+                # Backpropagation
+                loss.backward()
+                optimizer.step()
 
-                    # Calcul de la perte
-                    loss = criterion(outputs.squeeze(), labels.float())
-
-                    # Backpropagation
-                    loss.backward()
-                    optimizer.step()
-
-                    running_loss += loss.item()
-            print("____ Training Succeesded")     
+                running_loss += loss.item()
+        print("____ Training Succeesded")     
 
 
-        Pour évaluer ce modèle, on peut utiliser le code suivant :
+    Pour évaluer ce modèle, on peut utiliser le code suivant :
 
         .. code-block:: python
 
@@ -538,53 +537,9 @@ Modèles non supervisés
 
         print(f"Accuracy: {accuracy:.5f}")
 
-Bibliothèques utilisées: 
--------------------------
-
-.. code-block:: python
-
-    import pandas as pd
-    import numpy as np
-    import matplotlib.pyplot as plt
-
-    import seaborn as sns
-    from prettytable import PrettyTable  
 
 
-    from sklearn import svm
-    from sklearn.svm import LinearSVC, SVC
-    from sklearn.linear_model import LogisticRegression, SGDClassifier
-
-    from sklearn.preprocessing import StandardScaler
-    from sklearn.model_selection import GridSearchCV, RandomizedSearchCV 
-    from sklearn.metrics import accuracy_score, confusion_matrix, make_scorer, fbeta_score, classification_report
-    from sklearn.metrics import auc, f1_score, roc_curve, roc_auc_score  
-    from sklearn.metrics import adjusted_mutual_info_score, silhouette_score
-
-
-    from sklearn.tree import DecisionTreeClassifier
-
-    from sklearn.neural_network import MLPClassifier
-
-    import torch
-    import torch.nn as nn
-    import torch.nn.functional as F
-    from torch.utils.data import DataLoader, TensorDataset
-    import torch.optim as optim 
-
-    from sklearn.cluster import KMeans
-
-    import xgboost as xgb
-
-    from scipy.optimize import linear_sum_assignment
-    from scipy.stats import mode
-
-    import pickle 
-
-    import tensorflow as tf
-
-
-Références utiles : 
+Documentations Python : 
 ---------------------
 
 - PyTorch: https://pytorch.org/docs/
