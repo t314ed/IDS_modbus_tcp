@@ -6,7 +6,7 @@ Pour générer la documentation utiliser la commande suivante :
 
 ```bash
 cd documentation
-mahe html
+make html
 ```
 
 La documentation se trouvera ensuite dans un dossier `documentation/build`. 
